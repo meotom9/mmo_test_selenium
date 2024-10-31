@@ -24,8 +24,9 @@ public class TaskMMO implements Runnable {
                     user_agent = TaskSyncDB.getRandomUsersPC().getUserAgent();
                 }
 //                boolean flag = new GoogleFunctionUI().requestAPI(mc.getTerm(), mc.getSiteUrl(), user_agent, mc.getActionsMain(), mc.getActionsAds());
-                GoogleFunctionUI.getWindowSize();
-                boolean flag = GoogleFunctionUI.requestAPI(mc.getTerm(), mc.getSiteUrl(), user_agent, mc.getActionsMain(), mc.getActionsAds());
+                new GoogleFunctionUI().getWindowSize();
+                String windowSize = new GoogleFunctionUI().randomWindowSize();
+                boolean flag = new GoogleFunctionUI().requestAPI(mc.getTerm(), mc.getSiteUrl(), user_agent, windowSize, mc.getActionsMain(), mc.getActionsAds());
 //                new TestChromeDriver().requestAPI(mc.getTerm(), mc.getSiteUrl());
                 if(flag) {
                     System.out.println("GoogleFunction run successfully");

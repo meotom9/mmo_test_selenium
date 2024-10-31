@@ -23,7 +23,7 @@ public class GoogleFunctionUI {
 
     private static ArrayList<String> l_window_size = new ArrayList();
 
-    public static WebDriver driver;
+//    public static WebDriver driver;
 
 //    public GoogleFunctionUI() {
 //        getWindowSize();
@@ -43,7 +43,7 @@ public class GoogleFunctionUI {
 //        }
 //    }
 
-    public static void getWindowSize() {
+    public void getWindowSize() {
         String filePath = "/deployments/window-size"; // Specify the path to your file
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -52,7 +52,7 @@ public class GoogleFunctionUI {
 //                logger.info(line); // Process the line (print it in this case)
                 l_window_size.add(line);
             }
-            System.out.println("Window size:" + l_window_size.size());
+//            System.out.println("Window size:" + l_window_size.size());
         } catch (IOException e) {
             e.printStackTrace(); // Handle exceptions (file not found, etc.)
         }
@@ -63,12 +63,12 @@ public class GoogleFunctionUI {
 //        return l_user_agent.get(stt);
 //    }
 
-    public static String randomWindowSize() {
+    public String randomWindowSize() {
         int stt = UtilsFunction.randomRange(0, l_window_size.size() - 1);
         return l_window_size.get(stt);
     }
 
-    public static boolean requestAPI(String term, String website, String userAgent, String actionMain, String actionAds) {
+    public boolean requestAPI(String term, String website, String userAgent, String windowSize, String actionMain, String actionAds) {
 //    public void requestAPI(String term, String website, String userAgent, String actionMain, String actionAds) {
         // Clear WebDriverManager cache (if needed)
 //        WebDriverManager.chromedriver().clearDriverCache();
@@ -105,7 +105,7 @@ public class GoogleFunctionUI {
         options.addArguments("--disable-infobars"); // Disable GPU for headless mode
         options.addArguments("--disable-notifications"); // Disable browser notifications
         options.addArguments("--disable-extensions"); // Disable extensions of browser
-        options.addArguments("--window-size=" + randomWindowSize()); // Set window size (optional)
+        options.addArguments("--window-size=" + windowSize); // Set window size (optional)
         options.addArguments("--user-agent=" + userAgent);
 //        options.addArguments("--window-size=480,510"); // Set window size (optional)
 //        options.addArguments("--user-agent=Mozilla/5.0 (Linux; Android 10; MED-LX9N; HMSCore 6.14.0.301) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 HuaweiBrowser/14.0.5.302 Mobile Safari/537.3");
@@ -131,7 +131,7 @@ public class GoogleFunctionUI {
 
 
         // Initialize the ChromeDriver
-        driver = new ChromeDriver(options);
+        WebDriver driver = new ChromeDriver(options);
 //        WebDriver driver = new ChromeDriver();
         logger.info("1. Create Chrome Driver done");
 
@@ -240,7 +240,7 @@ public class GoogleFunctionUI {
         return flag;
     }
 
-    public static void scrollWeb(WebDriver driver, int start) {
+    public void scrollWeb(WebDriver driver, int start) {
         ((JavascriptExecutor) driver).executeScript("window.scrollBy(" + UtilsFunction.randomRange(start, start + 500) + ", " + UtilsFunction.randomRange(start + 500, start + 1000) + ")");
 //        ((JavascriptExecutor) driver).executeScript("window.scrollBy(" + (start + 300) + ", " + (start + 800) + ")");
         try {
@@ -255,7 +255,7 @@ public class GoogleFunctionUI {
 //        new GoogleFunctionUI().requestAPI("\"Top địa chỉ phòng tập gym tại Nghệ An\"", "top10nghean.com");
 //    }
 
-    public static boolean doAction(WebDriver driver, String action) {
+    public boolean doAction(WebDriver driver, String action) {
         boolean flag = false;
         String[] l_action = action.split(",");
         for (String ac : l_action) {
@@ -271,7 +271,8 @@ public class GoogleFunctionUI {
                         Collections.shuffle(links);
                         if (links.get(0) != null) {
                             if (links.get(0).isEnabled() && links.get(0).isDisplayed()) {
-                                links.get(0).click();
+                                Actions actions = new Actions(driver);
+                                actions.moveToElement(links.get(0)).click().perform();
                             }
                         }
                         try {
