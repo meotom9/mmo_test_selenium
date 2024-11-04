@@ -198,7 +198,6 @@ public class GoogleFunctionUI {
         } finally {
             // Close the browser
             if (driver != null) {
-                driver.close();
                 driver.quit();
             }
         }
