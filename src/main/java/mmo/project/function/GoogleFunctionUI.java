@@ -114,6 +114,7 @@ public class GoogleFunctionUI {
 //        options.addArguments("--proxy-server=sock5://116.111.96.127:10423:trinh_JJkKD:dyjaou0f");
         // Set the path to the Chrome binary
         options.setBinary("/opt/google/chrome/chrome");
+        options.addArguments("--no-zygote");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-insecure-localhost");
         options.addArguments("--disable-dev-shm-usage"); // Overcome limited resource problems
@@ -129,16 +130,16 @@ public class GoogleFunctionUI {
 //        options.addArguments("--window-size=480,510"); // Set window size (optional)
 //        options.addArguments("--user-agent=Mozilla/5.0 (Linux; Android 10; MED-LX9N; HMSCore 6.14.0.301) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 HuaweiBrowser/14.0.5.302 Mobile Safari/537.3");
 
-
-        // Initialize the ChromeDriver
-        WebDriver driver = new ChromeDriver(options);
-//        WebDriver driver = new ChromeDriver();
-        logger.info("1. Create Chrome Driver done");
-
+        WebDriver driver = null;
         try {
+            // Initialize the ChromeDriver
+            driver = new ChromeDriver(options);
+//          WebDriver driver = new ChromeDriver();
+            logger.info("1. Create Chrome Driver done");
+
             // Navigate to Google
             driver.get("https://www.google.com");
-//            Thread.sleep(50000);
+//          Thread.sleep(50000);
 
             // Find the search box and enter your query
             WebElement searchBox = driver.findElement(By.name("q"));
@@ -197,6 +198,7 @@ public class GoogleFunctionUI {
         } finally {
             // Close the browser
             if (driver != null) {
+                driver.close();
                 driver.quit();
             }
         }
