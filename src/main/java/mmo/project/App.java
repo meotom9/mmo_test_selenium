@@ -27,7 +27,7 @@ public class App {
         try {
             executor = Executors.newFixedThreadPool(2);
             Future<?> f_config = executor.submit(new TaskSyncDB());
-            Thread.sleep(5000);
+//            Thread.sleep(5000);
             Future<?> f_task = executor.submit(new TaskMMO());
 
             logger.info("Task completed successfully.");

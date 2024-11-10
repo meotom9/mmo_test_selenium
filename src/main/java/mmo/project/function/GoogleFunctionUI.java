@@ -7,6 +7,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.slf4j.helpers.Util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -132,10 +133,11 @@ public class GoogleFunctionUI {
 
         WebDriver driver = null;
         try {
+            logger.info("[Step]-0-Initialize the ChromeDriver");
             // Initialize the ChromeDriver
             driver = new ChromeDriver(options);
 //          WebDriver driver = new ChromeDriver();
-            logger.info("1. Create Chrome Driver done");
+            logger.info("[Step]-1-Create Chrome Driver done");
 
             // Navigate to Google
             driver.get("https://www.google.com");
@@ -145,51 +147,59 @@ public class GoogleFunctionUI {
             WebElement searchBox = driver.findElement(By.name("q"));
             searchBox.sendKeys(term);
             searchBox.submit();
-            logger.info("2. Search done");
+            logger.info("[Step]-2-Search done:"+term);
 //            Thread.sleep(50000);
-            doAction(driver, "scroll_5_2");
+//            doAction(driver, "scroll_5_2");
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             // Find the link containing "tieuchuannhat.vn" and click it
             ArrayList<WebElement> l_link = (ArrayList) driver.findElements(By.partialLinkText(website));
-            LevenshteinDistance lvd = new LevenshteinDistance();
             WebElement cur_link = null;
-            int cur_dis = 0;
+            String bestMatch = null;
+            int bestDistance = Integer.MAX_VALUE;
             for (WebElement link : l_link) {
-                int distance = lvd.apply(link.getText(), term);
-                if(distance >= cur_dis) {
+                String title = "";
+                try{
+                    title = link.findElement(By.cssSelector("h3")).getText();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                logger.info("Web Title: " + title);
+                int distance = new UtilsFunction().fuzzyMatch(term, title);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestMatch = title;
                     cur_link = link;
                 }
             }
+            logger.info("Best match WebTitle: " + bestMatch);
             Actions actions = new Actions(driver);
             actions.moveToElement(cur_link).click().perform();
-            logger.info("3. Click result website done");
+            logger.info("[Step]-3-Click result website done");
 
             // Wait for the page to load (you might need to adjust the wait time)
 //            Thread.sleep(5000);
 
             // Get the title of the current page
             String title = driver.getTitle();
-            logger.info("Current page title: " + title);
+            logger.info("[Step]-4-Current page title:" + title);
 
-            // Scroll website
-            logger.info("4.1. Start organic function");
-
-//            for (int i = 0; i < 5; i++) {
-//                logger.info("Finding Ads index: " + (i + 1));
-//                boolean flag = findAdsAndClick(driver, i * 500);
-//                if (flag)
-//                    break;
-//            }
-
-            logger.info("4.3. Do action from Main site");
+            logger.info("[Step]-5-Do action from Main site");
             boolean flag = doAction(driver, actionMain);
 
             if (flag) {
-                logger.info("4.3. Do action from Ads site");
+                logger.info("[Step]-6-Do action from Ads site");
                 doAction(driver, actionAds);
+            } else {
+                logger.info("[Step]-7-Cannot find Ads!");
             }
 
-            logger.info("4.5. End organic function");
+            logger.info("[Step]-8-End organic function");
 
             return true;
         } catch (Exception e) {
@@ -270,16 +280,18 @@ public class GoogleFunctionUI {
                         ArrayList<WebElement> links = (ArrayList) driver.findElements(By.tagName("a"));
                         System.out.println(" - Action: " + l_ac[0] + " - Count: " + i);
                         Collections.shuffle(links);
-                        if (links.get(0) != null) {
-                            if (links.get(0).isEnabled() && links.get(0).isDisplayed()) {
-                                Actions actions = new Actions(driver);
-                                actions.moveToElement(links.get(0)).click().perform();
+                        if(links.size()>0) {
+                            if (links.get(0) != null) {
+                                if (links.get(0).isEnabled() && links.get(0).isDisplayed()) {
+                                    Actions actions = new Actions(driver);
+                                    actions.moveToElement(links.get(0)).click().perform();
+                                }
                             }
-                        }
-                        try {
-                            Thread.sleep(wait * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            try {
+                                Thread.sleep(wait * 1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                         driver.navigate().back();
                     }
@@ -315,6 +327,7 @@ public class GoogleFunctionUI {
                         WebElement link = null;
                         try {
                             ArrayList<WebElement> l_link = (ArrayList) driver.findElements(By.cssSelector("[title=\"Advertisement\"]"));
+                            logger.info("- Website have: " + l_link.size() + " ads");
                             for (WebElement we : l_link) {
                                 int height = we.getSize().getHeight();
                                 logger.info("Ads size - Width: " + we.getSize().getWidth() + " - Height: " + we.getSize().getHeight());
